@@ -1,7 +1,7 @@
 package ormx
 
 import (
-	"context"
+	"fmt"
 	"testing"
 )
 
@@ -10,7 +10,16 @@ type User struct {
 	Name string
 }
 
+type IUserRepo interface {
+	IRepo[User]
+}
+
+type UserRepo struct {
+	Repo[User]
+}
+
+var _ IUserRepo = (*UserRepo)(nil)
+
 func TestRepo(t *testing.T) {
-	userRepo := Repo[User]{}
-	userRepo.GetById(context.TODO(), 1)
+	fmt.Println("123")
 }

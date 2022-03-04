@@ -17,7 +17,7 @@ type IRepo[T any] interface {
 	DeleteById(ctx context.Context, id any) error
 	Delete(ctx context.Context, opts ...opts.Option) error
 	Update(ctx context.Context, value *T) error
-	UpdateByMap(ctx context.Context, value map[string]any, opts ...opts.Option)
+	UpdateByMap(ctx context.Context, value map[string]any, opts ...opts.Option) error
 }
 
 type Repo[T any] struct {
