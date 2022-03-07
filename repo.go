@@ -21,6 +21,19 @@ type IRepo[T any] interface {
 }
 
 type Repo[T any] struct {
+	errHandle ErrHandle
+}
+
+type Option[T any] func(r *Repo[T])
+
+func NewRepo[T any](opts ...Option[T]) *Repo[T] {
+	r := &Repo[T]{
+		errHandle: DefaultErrHandle,
+	}
+	for _, opt := range opts {
+		opt(r)
+	}
+	return r
 }
 
 func (r *Repo[T]) Add(ctx context.Context, value *T) error {
@@ -32,7 +45,7 @@ func (r *Repo[T]) Add(ctx context.Context, value *T) error {
 func (r *Repo[T]) AddList(ctx context.Context, value []*T) error {
 	db := DB(ctx)
 	err := db.CreateInBatches(value, 1000).Error
-	return err
+	return r.errHandle(err)
 }
 
 func (r *Repo[T]) Get(ctx context.Context, opts ...opts.Option) (*T, error) {
@@ -42,14 +55,14 @@ func (r *Repo[T]) Get(ctx context.Context, opts ...opts.Option) (*T, error) {
 		db = opt(db)
 	}
 	err := db.First(target).Error
-	return target, err
+	return target, r.errHandle(err)
 }
 
 func (r *Repo[T]) GetById(ctx context.Context, id any) (*T, error) {
 	db := DB(ctx)
 	target := new(T)
 	err := db.First(target, id).Error
-	return target, err
+	return target, r.errHandle(err)
 }
 
 func (r *Repo[T]) GetExist(ctx context.Context, opts ...opts.Option) (bool, error) {
@@ -60,9 +73,9 @@ func (r *Repo[T]) GetExist(ctx context.Context, opts ...opts.Option) (bool, erro
 	}
 	err := db.First(target).Error
 	if err != nil {
-		return false, err
+		return false, r.errHandle(err)
 	}
-	return true, err
+	return true, r.errHandle(err)
 }
 
 func (r *Repo[T]) GetList(ctx context.Context, opts ...opts.Option) ([]*T, error) {
@@ -72,7 +85,7 @@ func (r *Repo[T]) GetList(ctx context.Context, opts ...opts.Option) ([]*T, error
 		db = opt(db)
 	}
 	err := db.Find(&list).Error
-	return list, err
+	return list, r.errHandle(err)
 }
 
 func (r *Repo[T]) Count(ctx context.Context, opts ...opts.Option) (int64, error) {
@@ -83,13 +96,13 @@ func (r *Repo[T]) Count(ctx context.Context, opts ...opts.Option) (int64, error)
 		db = opt(db)
 	}
 	err := db.Model(target).Count(&count).Error
-	return count, err
+	return count, r.errHandle(err)
 }
 
 func (r *Repo[T]) DeleteById(ctx context.Context, id any) error {
 	db := DB(ctx)
 	err := db.Delete(new(T), id).Error
-	return err
+	return r.errHandle(err)
 }
 
 func (r *Repo[T]) Delete(ctx context.Context, opts ...opts.Option) error {
@@ -98,19 +111,19 @@ func (r *Repo[T]) Delete(ctx context.Context, opts ...opts.Option) error {
 		db = opt(db)
 	}
 	err := db.Delete(new(T)).Error
-	return err
+	return r.errHandle(err)
 }
 
 func (r *Repo[T]) Update(ctx context.Context, value *T) error {
 	db := DB(ctx)
 	target := new(T)
 	err := db.Model(target).Updates(value).Error
-	return err
+	return r.errHandle(err)
 }
 
 func (r *Repo[T]) UpdateByMap(ctx context.Context, value map[string]any, opts ...opts.Option) error {
 	db := DB(ctx)
 	target := new(T)
 	err := db.Model(target).Updates(value).Error
-	return err
+	return r.errHandle(err)
 }
