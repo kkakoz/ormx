@@ -21,14 +21,14 @@ type IRepo[T any] interface {
 }
 
 type Repo[T any] struct {
-	errHandle ErrHandle
+	errHandle ErrHandler
 }
 
 type Option[T any] func(r *Repo[T])
 
 func NewRepo[T any](opts ...Option[T]) *Repo[T] {
 	r := &Repo[T]{
-		errHandle: DefaultErrHandle,
+		errHandle: DefaultErrHandler,
 	}
 	for _, opt := range opts {
 		opt(r)

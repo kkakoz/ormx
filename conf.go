@@ -1,7 +1,7 @@
 package ormx
 
-type ErrHandle func(err error) error
+type ErrHandler func(err error) error
 
-var DefaultErrHandle = func(err error) error {
+var DefaultErrHandler = func(err error) error {
 	return err
 }
