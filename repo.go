@@ -113,7 +113,7 @@ func (r *Repo[T]) Delete(ctx context.Context, opts ...opts.Option) error {
 	return r.errHandle(err)
 }
 
-func (r *Repo[T]) Updates(ctx context.Context, value T, opts ...opts.Option) error {
+func (r *Repo[T]) Updates(ctx context.Context, value any, opts ...opts.Option) error {
 	db := DB(ctx)
 	target := new(T)
 	for _, opt := range opts {
