@@ -16,7 +16,7 @@ type IRepo[T any] interface {
 	Count(ctx context.Context, opts ...opts.Option) (int64, error)
 	DeleteById(ctx context.Context, id any) error
 	Delete(ctx context.Context, opts ...opts.Option) error
-	Updates(ctx context.Context, value T, opts ...opts.Option) error
+	Updates(ctx context.Context, value any, opts ...opts.Option) error
 }
 
 type Repo[T any] struct {
