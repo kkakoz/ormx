@@ -15,8 +15,7 @@ func NewOpts() Options {
 }
 
 func (o Options) Where(key string, value any) Options {
-	o = append(o, Where(key, value))
-	return o
+	return append(o, Where(key, value))
 }
 
 func Where(key string, values ...any) Option {
@@ -25,14 +24,25 @@ func Where(key string, values ...any) Option {
 	}
 }
 
+func (o Options) IsWhere(is bool, key string, value any) Options {
+	return append(o, Where(key, value))
+}
+
+func IsWhere(is bool, key string, values ...any) Option {
+	return func(db *gorm.DB) *gorm.DB {
+		if is {
+			return db.Where(key, values...)
+		}
+		return db
+	}
+}
+
 func (o Options) Like(key string, value string) Options {
-	o = append(o, Like(key, value))
-	return o
+	return append(o, Like(key, value))
 }
 
 func (o Options) Func(f Option) Options {
-	o = append(o, f)
-	return o
+	return append(o, f)
 }
 
 func Like(key string, value string) Option {
@@ -42,8 +52,7 @@ func Like(key string, value string) Option {
 }
 
 func (o Options) IsLike(is bool, key string, value string) Options {
-	o = append(o, IsLike(is, key, value))
-	return o
+	return append(o, IsLike(is, key, value))
 }
 
 func IsLike(is bool, key string, value string) Option {
@@ -56,8 +65,7 @@ func IsLike(is bool, key string, value string) Option {
 }
 
 func (o Options) EQ(key string, value any) Options {
-	o = append(o, EQ(key, value))
-	return o
+	return append(o, EQ(key, value))
 }
 
 func EQ(key string, value any) Option {
@@ -67,8 +75,7 @@ func EQ(key string, value any) Option {
 }
 
 func (o Options) IsEQ(is bool, key string, value any) Options {
-	o = append(o, IsEQ(is, key, value))
-	return o
+	return append(o, IsEQ(is, key, value))
 }
 
 func IsEQ(is bool, key string, value any) Option {
@@ -81,8 +88,7 @@ func IsEQ(is bool, key string, value any) Option {
 }
 
 func (o Options) In(key string, value any) Options {
-	o = append(o, In(key, value))
-	return o
+	return append(o, In(key, value))
 }
 
 func In(key string, value any) Option {
@@ -91,20 +97,28 @@ func In(key string, value any) Option {
 	}
 }
 
-func (o Options) Page(page int, pageSize int) Options {
-	o = append(o, Page(page, pageSize))
-	return o
+func (o Options) Limit(limit int) Options {
+	return append(o, Limit(limit))
 }
 
-func Page(page int, pageSize int) Option {
+func Limit(limit int) Option {
 	return func(db *gorm.DB) *gorm.DB {
-		return db.Limit(pageSize).Offset((page - 1) * pageSize)
+		return db.Limit(limit)
+	}
+}
+
+func (o Options) Offset(offset int) Options {
+	return append(o, Offset(offset))
+}
+
+func Offset(offset int) Option {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Offset(offset)
 	}
 }
 
 func (o Options) Order(key string) Options {
-	o = append(o, Order(key))
-	return o
+	return append(o, Order(key))
 }
 
 func Order(key string) Option {

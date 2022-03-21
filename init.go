@@ -8,17 +8,16 @@ import (
 	"os"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-var db *gorm.DB
+var ormDB *gorm.DB
 
 func InitDB(database *gorm.DB) {
-	db = database
+	ormDB = database
 }
 
 func New(viper *viper.Viper) (*gorm.DB, error) {
@@ -52,8 +51,8 @@ func New(viper *viper.Viper) (*gorm.DB, error) {
 		DisableForeignKeyConstraintWhenMigrating: true, // AutoMigrate不会自动添加外键
 	}
 
-	db, err = gorm.Open(mysql.Open(dns), config)
-	return db, errors.Wrap(err, "打开mysql连接失败")
+	ormDB, err = gorm.Open(mysql.Open(dns), config)
+	return ormDB, err
 }
 
 // 可以看 https://github.com/win5do/go-microservice-demo/blob/main/docs/sections/gorm.md
@@ -67,7 +66,7 @@ func CtxWithTransaction(ctx context.Context, tx *gorm.DB) context.Context {
 }
 
 func Transaction(ctx context.Context, fc func(txctx context.Context) error) error {
-	db := db.WithContext(ctx)
+	db := ormDB.WithContext(ctx)
 
 	return db.Transaction(func(tx *gorm.DB) error {
 		txctx := CtxWithTransaction(ctx, tx)
@@ -76,7 +75,7 @@ func Transaction(ctx context.Context, fc func(txctx context.Context) error) erro
 }
 
 func Begin(ctx context.Context, opts ...*sql.TxOptions) (context.Context, CheckError) {
-	tx := db.Begin(opts...)
+	tx := ormDB.Begin(opts...)
 	return context.WithValue(ctx, ctxTransactionKey{}, tx), func(err error) error {
 		if err != nil {
 			tx.Rollback()
@@ -96,7 +95,7 @@ func DB(ctx context.Context) *gorm.DB {
 		}
 	}
 
-	return db.WithContext(ctx)
+	return ormDB.WithContext(ctx)
 }
 
 func CheckErr(database *gorm.DB, err error) error {
@@ -120,13 +119,13 @@ type Model struct {
 func FlushDB() {
 
 	var tables []string
-	err := db.Table("information_schema.tables").Where("table_schema = ?", "server_test").Pluck("table_name", &tables).Error
+	err := ormDB.Table("information_schema.tables").Where("table_schema = ?", "server_test").Pluck("table_name", &tables).Error
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	for _, table := range tables {
-		db.Table(table).Exec(fmt.Sprintf("truncate table `%s`", table))
+		ormDB.Table(table).Exec(fmt.Sprintf("truncate table `%s`", table))
 	}
 
 }

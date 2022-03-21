@@ -16,8 +16,7 @@ type IRepo[T any] interface {
 	Count(ctx context.Context, opts ...opts.Option) (int64, error)
 	DeleteById(ctx context.Context, id any) error
 	Delete(ctx context.Context, opts ...opts.Option) error
-	Update(ctx context.Context, value *T) error
-	UpdateByMap(ctx context.Context, value map[string]any, opts ...opts.Option) error
+	Updates(ctx context.Context, value T, opts ...opts.Option) error
 }
 
 type Repo[T any] struct {
@@ -114,16 +113,12 @@ func (r *Repo[T]) Delete(ctx context.Context, opts ...opts.Option) error {
 	return r.errHandle(err)
 }
 
-func (r *Repo[T]) Update(ctx context.Context, value *T) error {
+func (r *Repo[T]) Updates(ctx context.Context, value T, opts ...opts.Option) error {
 	db := DB(ctx)
 	target := new(T)
-	err := db.Model(target).Updates(value).Error
-	return r.errHandle(err)
-}
-
-func (r *Repo[T]) UpdateByMap(ctx context.Context, value map[string]any, opts ...opts.Option) error {
-	db := DB(ctx)
-	target := new(T)
+	for _, opt := range opts {
+		db = opt(db)
+	}
 	err := db.Model(target).Updates(value).Error
 	return r.errHandle(err)
 }
