@@ -27,7 +27,7 @@ type repo[T any] struct {
 
 type Option[T any] func(r *repo[T])
 
-func NewRepo[T any](opts ...Option[T]) *repo[T] {
+func NewRepo[T any](opts ...Option[T]) IRepo[T] {
 	r := &repo[T]{
 		errHandle: DefaultErrHandler,
 	}
