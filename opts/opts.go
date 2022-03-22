@@ -24,8 +24,8 @@ func Where(key string, values ...any) Option {
 	}
 }
 
-func (o Options) IsWhere(is bool, key string, value any) Options {
-	return append(o, Where(key, value))
+func (o Options) IsWhere(is bool, key string, values ...any) Options {
+	return append(o, IsWhere(is, key, values...))
 }
 
 func IsWhere(is bool, key string, values ...any) Option {
@@ -124,5 +124,15 @@ func (o Options) Order(key string) Options {
 func Order(key string) Option {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.Order(key)
+	}
+}
+
+func (o Options) Preload(name string, args ...any) Options {
+	return append(o, Preload(name, args...))
+}
+
+func Preload(name string, args ...any) Option {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Preload(name, args...)
 	}
 }
