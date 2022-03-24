@@ -14,8 +14,8 @@ func NewOpts() Options {
 	return Options{}
 }
 
-func (o Options) Where(key string, value any) Options {
-	return append(o, Where(key, value))
+func (o Options) Where(key string, value ...any) Options {
+	return append(o, Where(key, value...))
 }
 
 func Where(key string, values ...any) Option {
