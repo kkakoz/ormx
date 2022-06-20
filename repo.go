@@ -12,9 +12,11 @@ type IRepo[T any] interface {
 	Add(ctx context.Context, value *T) error
 	AddList(ctx context.Context, value []*T) error
 	Get(ctx context.Context, opts ...opts.Option) (*T, error)
+	Pluck(ctx context.Context, column string, slice any, opts ...opts.Option) error
 	GetById(ctx context.Context, id any) (*T, error)
 	GetExist(ctx context.Context, opts ...opts.Option) (bool, error)
 	GetList(ctx context.Context, opts ...opts.Option) ([]*T, error)
+	PageList(ctx context.Context, offset, limit int, opts ...opts.Option) ([]*T, int64, error)
 	Count(ctx context.Context, opts ...opts.Option) (int64, error)
 	DeleteById(ctx context.Context, id any) error
 	Delete(ctx context.Context, opts ...opts.Option) error
@@ -24,8 +26,6 @@ type IRepo[T any] interface {
 type repo[T any] struct {
 	errHandle ErrHandler
 }
-
-type Option[T any] func(r *repo[T])
 
 func NewRepo[T any](opts ...Option[T]) IRepo[T] {
 	r := &repo[T]{
@@ -59,6 +59,14 @@ func (r *repo[T]) Get(ctx context.Context, opts ...opts.Option) (*T, error) {
 	return target, r.errHandle(err)
 }
 
+func (r *repo[T]) Pluck(ctx context.Context, column string, slice any, opts ...opts.Option) error {
+	db := DB(ctx)
+	for _, opt := range opts {
+		db = opt(db)
+	}
+	return r.errHandle(db.Pluck(column, slice).Error)
+}
+
 func (r *repo[T]) GetById(ctx context.Context, id any) (*T, error) {
 	db := DB(ctx)
 	target := new(T)
@@ -90,6 +98,19 @@ func (r *repo[T]) GetList(ctx context.Context, opts ...opts.Option) ([]*T, error
 	}
 	err := db.Find(&list).Error
 	return list, r.errHandle(err)
+}
+
+func (r *repo[T]) PageList(ctx context.Context, offset, limit int, opts ...opts.Option) ([]*T, int64, error) {
+	db := DB(ctx)
+	list := make([]*T, 0)
+	for _, opt := range opts {
+		db = opt(db)
+	}
+	t := new(T)
+	var count int64
+	db.Model(t).Count(&count)
+	err := db.Limit(limit).Offset(offset).Find(&list).Error
+	return list, count, r.errHandle(err)
 }
 
 func (r *repo[T]) Count(ctx context.Context, opts ...opts.Option) (int64, error) {

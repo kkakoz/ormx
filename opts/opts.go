@@ -2,7 +2,6 @@ package opts
 
 import (
 	"fmt"
-
 	"gorm.io/gorm"
 )
 
@@ -14,21 +13,21 @@ func NewOpts() Options {
 	return Options{}
 }
 
-func (o Options) Where(key string, value ...any) Options {
+func (o Options) Where(key any, value ...any) Options {
 	return append(o, Where(key, value...))
 }
 
-func Where(key string, values ...any) Option {
+func Where(key any, values ...any) Option {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.Where(key, values...)
 	}
 }
 
-func (o Options) IsWhere(is bool, key string, values ...any) Options {
+func (o Options) IsWhere(is bool, key any, values ...any) Options {
 	return append(o, IsWhere(is, key, values...))
 }
 
-func IsWhere(is bool, key string, values ...any) Option {
+func IsWhere(is bool, key any, values ...any) Option {
 	return func(db *gorm.DB) *gorm.DB {
 		if is {
 			return db.Where(key, values...)
@@ -41,7 +40,7 @@ func (o Options) Like(key string, value string) Options {
 	return append(o, Like(key, value))
 }
 
-func (o Options) Func(f Option) Options {
+func (o Options) By(f Option) Options {
 	return append(o, f)
 }
 
