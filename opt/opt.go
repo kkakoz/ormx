@@ -1,4 +1,4 @@
-package opts
+package opt
 
 import (
 	"fmt"
@@ -134,4 +134,11 @@ func Preload(name string, args ...any) Option {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.Preload(name, args...)
 	}
+}
+
+func OptionsDB(db *gorm.DB, options ...Option) *gorm.DB {
+	for _, o := range options {
+		db = o(db)
+	}
+	return db
 }

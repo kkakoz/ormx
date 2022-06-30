@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/kkakoz/ormx"
-	"github.com/kkakoz/ormx/opts"
+	"github.com/kkakoz/ormx/opt"
 	"github.com/spf13/viper"
 	"testing"
 )
@@ -41,11 +41,6 @@ func TestRepo(t *testing.T) {
 		panic(err)
 	}
 	fmt.Println(user)
-	fmt.Println(userRepo.PageList(context.TODO(), 2, 5, opts.Like("name", "张")))
-	// var userRepo IUserRepo = ormx.NewRepo[User]()
-	// user, err := userRepo.Get(context.Background())
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println(user)
+	fmt.Println(userRepo.PageList(context.TODO(), 2, 5, opt.Like("name", "张")))
+	fmt.Println(userRepo.GetById(context.TODO()))
 }

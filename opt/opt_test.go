@@ -1,10 +1,10 @@
-package opts_test
+package opt_test
 
 import (
 	"context"
 	"fmt"
 	"github.com/kkakoz/ormx"
-	"github.com/kkakoz/ormx/opts"
+	"github.com/kkakoz/ormx/opt"
 	"log"
 	"testing"
 )
@@ -15,7 +15,7 @@ type User struct {
 	Phone string
 }
 
-func GetList(opts ...opts.Option) ([]*User, error) {
+func GetList(opts ...opt.Option) ([]*User, error) {
 	db := ormx.DB(context.TODO())
 	for _, opt := range opts {
 		opt(db)
@@ -27,13 +27,13 @@ func GetList(opts ...opts.Option) ([]*User, error) {
 
 func TestGetList(t *testing.T) {
 	name := "张"
-	list, err := GetList(opts.Like("name", name))
+	list, err := GetList(opt.Like("name", name))
 	if err != nil {
 		log.Fatalln(err)
 	}
 	fmt.Println(list)
 	phone := "12345678910"
-	list, err = GetList(opts.Where("phone = ?", phone))
+	list, err = GetList(opt.Where("phone = ?", phone))
 	if err != nil {
 		log.Fatalln(err)
 	}
