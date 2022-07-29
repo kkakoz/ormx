@@ -1,8 +1,6 @@
 package ormx
 
 import (
-	"context"
-	"database/sql"
 	"fmt"
 	"log"
 	"os"
@@ -53,60 +51,6 @@ func New(viper *viper.Viper) (*gorm.DB, error) {
 
 	ormDB, err = gorm.Open(mysql.Open(dns), config)
 	return ormDB, err
-}
-
-// 可以看 https://github.com/win5do/go-microservice-demo/blob/main/docs/sections/gorm.md
-type ctxTransactionKey struct{}
-
-func CtxWithTransaction(ctx context.Context, tx *gorm.DB) context.Context {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	return context.WithValue(ctx, ctxTransactionKey{}, tx)
-}
-
-func Transaction(ctx context.Context, fc func(txctx context.Context) error) error {
-	db := ormDB.WithContext(ctx)
-
-	return db.Transaction(func(tx *gorm.DB) error {
-		txctx := CtxWithTransaction(ctx, tx)
-		return fc(txctx)
-	})
-}
-
-func Begin(ctx context.Context, opts ...*sql.TxOptions) (context.Context, CheckError) {
-	tx := ormDB.Begin(opts...)
-	return context.WithValue(ctx, ctxTransactionKey{}, tx), func(err error) error {
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-		return tx.Commit().Error
-	}
-}
-
-func DB(ctx context.Context) *gorm.DB {
-	iface := ctx.Value(ctxTransactionKey{})
-
-	if iface != nil {
-		tx, ok := iface.(*gorm.DB)
-		if ok {
-			return tx
-		}
-	}
-
-	return ormDB.WithContext(ctx)
-}
-
-func CheckErr(database *gorm.DB, err error) error {
-	if err != nil {
-		curErr := database.Rollback().Error
-		if curErr != nil {
-			return curErr
-		}
-		return err
-	}
-	return database.Commit().Error
 }
 
 type Model struct {
