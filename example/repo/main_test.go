@@ -1,4 +1,4 @@
-package ormx_test
+package repo_test
 
 import (
 	"github.com/kkakoz/ormx"
@@ -7,7 +7,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	viper.SetConfigFile("configs/conf.yaml")
+	viper.SetConfigFile("../../configs/conf.yaml")
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(err)
