@@ -6,6 +6,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type QueryOption func(db *gorm.DB)
+
+func RowEffect(affect *int64) QueryOption {
+	return func(db *gorm.DB) {
+		*affect = db.RowsAffected
+	}
+}
+
 type IDBExec[T any] interface {
 	Where(query string, v ...any) *T
 }
@@ -31,9 +39,12 @@ func (us *DBXQuery[T, Query]) Table(name string) *DBXQuery[T, Query] {
 	return us
 }
 
-func (us *DBXQuery[T, Query]) List() ([]*T, error) {
+func (us *DBXQuery[T, Query]) List(opts ...QueryOption) ([]*T, error) {
 	res := make([]*T, 0)
 	err := us.db.Find(&res).Error
+	for _, opt := range opts {
+		opt(us.db)
+	}
 	return res, err
 }
 
@@ -113,5 +124,10 @@ func (us *DBXQuery[T, Query]) IsWhere(b bool, query string, v ...any) *Query {
 
 func (us *DBXQuery[T, Query]) Preload(name string, args ...any) *Query {
 	us.db = us.db.Preload(name, args...)
+	return us.query
+}
+
+func (us *DBXQuery[T, Query]) Group(name string) *Query {
+	us.db = us.db.Group(name)
 	return us.query
 }

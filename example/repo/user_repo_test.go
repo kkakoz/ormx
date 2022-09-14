@@ -25,11 +25,11 @@ func TestUserRepo(t *testing.T) {
 		panic(err)
 	}
 
-	list, err := userRepo.Query(ctx).NameLike("zhangsan").List()
+	users, err := userRepo.Query(ctx).NameLike("zhangsan").List()
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(list)
+	fmt.Println(users)
 
 	user, err := userRepo.Query(ctx).ID(1).One()
 	if err != nil {
@@ -38,19 +38,26 @@ func TestUserRepo(t *testing.T) {
 
 	fmt.Println(user)
 
+	user, err = userRepo.Query(ctx).ID(1).OneOrFailed()
+	if err != nil {
+		panic(err)
+	}
+
 	err = userRepo.Update(ctx).Update("name", "lisi")
 	if err != nil {
 		panic(err)
 	}
 
-	err = userRepo.Delete(ctx).Delete()
+	err = userRepo.Delete(ctx).ID(1).Delete()
 	if err != nil {
 		panic(err)
 	}
-
 }
 
 func TestInit(t *testing.T) {
+
+	file, err := os.Open("./to/")
+	fmt.Println(file, err)
 
 	ormx.QueryInit(model.User{}, os.Stdout)
 

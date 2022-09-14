@@ -9,7 +9,11 @@ import (
 
 func QueryInit(v any, wr io.Writer) {
 	typeV := reflect.TypeOf(v)
-	if typeV.Kind() != reflect.Struct {
+	if typeV.Kind() == reflect.Pointer {
+		if typeV.Elem().Kind() != reflect.Struct {
+			panic("model type must struct")
+		}
+	} else if typeV.Kind() != reflect.Struct {
 		panic("model type must struct")
 	}
 
