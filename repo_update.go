@@ -5,47 +5,45 @@ import (
 	"gorm.io/gorm"
 )
 
-type DBXUpdate[T any, Query any] struct {
-	db    *gorm.DB
-	query *Query
+type DBXUpdate[T any] struct {
+	db *gorm.DB
 }
 
-func NewDBXUpdate[T any, Query any](ctx context.Context, query *Query) *DBXUpdate[T, Query] {
-	return &DBXUpdate[T, Query]{
-		db:    DB(ctx),
-		query: query,
+func NewDBXUpdate[T any](ctx context.Context) *DBXUpdate[T] {
+	return &DBXUpdate[T]{
+		db: DB(ctx).Model(new(T)),
 	}
 }
 
-func (us *DBXUpdate[T, Query]) DB() *gorm.DB {
+func (us *DBXUpdate[T]) DB() *gorm.DB {
 	return us.db
 }
 
-func (us *DBXUpdate[T, Query]) Table(name string) *DBXUpdate[T, Query] {
-	us.db.Table(name)
+func (us *DBXUpdate[T]) Table(name string) *DBXUpdate[T] {
+	us.db = us.db.Table(name)
 	return us
 }
 
-func (us *DBXUpdate[T, Query]) Where(query string, v ...any) *Query {
+func (us *DBXUpdate[T]) Where(query string, v ...any) *DBXUpdate[T] {
 	us.db = us.db.Where(query, v...)
-	return us.query
+	return us
 }
 
-func (us *DBXUpdate[T, Query]) IsWhere(b bool, query string, v ...any) *Query {
+func (us *DBXUpdate[T]) IsWhere(b bool, query string, v ...any) *DBXUpdate[T] {
 	if b {
 		us.db = us.db.Where(query, v...)
 	}
-	return us.query
+	return us
 }
 
-func (us *DBXUpdate[T, Query]) Update(column string, value any) error {
-	return us.db.Model(new(T)).Update(column, value).Error
+func (us *DBXUpdate[T]) Update(column string, value any) error {
+	return us.db.Update(column, value).Error
 }
 
-func (us *DBXUpdate[T, Query]) Updates(value T) error {
-	return us.db.Model(new(T)).Updates(value).Error
+func (us *DBXUpdate[T]) Updates(value T) error {
+	return us.db.Updates(value).Error
 }
 
-func (us *DBXUpdate[T, Query]) UpdatesMap(value map[string]any) error {
-	return us.db.Model(new(T)).Updates(value).Error
+func (us *DBXUpdate[T]) UpdatesMap(value map[string]any) error {
+	return us.db.Updates(value).Error
 }

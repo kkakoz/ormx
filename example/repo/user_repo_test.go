@@ -3,7 +3,6 @@ package repo_test
 import (
 	"context"
 	"fmt"
-	"github.com/kkakoz/ormx"
 	"github.com/kkakoz/ormx/example/model"
 	"github.com/kkakoz/ormx/example/repo"
 	"os"
@@ -16,49 +15,32 @@ type User struct {
 }
 
 func TestUserRepo(t *testing.T) {
-	userRepo := repo.UserRepo{}
+	userRepo := repo.UserRepo()
 
-	ctx := context.TODO()
+	ctx := context.Background()
 
-	err := userRepo.Create(ctx).Add(&model.User{Name: "1"})
+	userRepo.Create(ctx, &model.User{ID: 1, Name: "John"})
+	one, err := userRepo.Query(ctx).Like("name", "zhangsan").One()
 	if err != nil {
-		panic(err)
+		t.Fail()
+	}
+	fmt.Println(one)
+
+	one, err = userRepo.Query(ctx).EQ("id", "1").One()
+	if err != nil {
+		t.Fail()
 	}
 
-	users, err := userRepo.Query(ctx).NameLike("zhangsan").List()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(users)
-
-	user, err := userRepo.Query(ctx).ID(1).One()
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(user)
-
-	user, err = userRepo.Query(ctx).ID(1).OneOrFailed()
-	if err != nil {
-		panic(err)
-	}
-
-	err = userRepo.Update(ctx).Update("name", "lisi")
-	if err != nil {
-		panic(err)
-	}
-
-	err = userRepo.Delete(ctx).ID(1).Delete()
-	if err != nil {
-		panic(err)
-	}
+	//var count int64
+	//err = userRepo.Delete(ctx).Where("name = ?", "John").Exec(ormx.RowEffect(&count))
+	//if err != nil {
+	//	t.Fail()
+	//}
+	//fmt.Println(count)
 }
 
 func TestInit(t *testing.T) {
 
 	file, err := os.Open("./to/")
 	fmt.Println(file, err)
-
-	ormx.QueryInit(model.User{}, os.Stdout)
-
 }
