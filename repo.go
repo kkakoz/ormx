@@ -61,7 +61,7 @@ func (r *repo[T]) Get(ctx context.Context, opts ...opt.Option) (*T, error) {
 }
 
 func (r *repo[T]) Pluck(ctx context.Context, column string, slice any, opts ...opt.Option) error {
-	db := DB(ctx)
+	db := DB(ctx).Model(new(T))
 	db = opt.OptionsDB(db, opts...)
 	return r.errHandle(db.Pluck(column, slice).Error)
 }
