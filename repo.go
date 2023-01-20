@@ -44,6 +44,9 @@ func (r *repo[T]) Add(ctx context.Context, value *T) error {
 }
 
 func (r *repo[T]) AddList(ctx context.Context, value []*T) error {
+	if len(value) == 0 {
+		return nil
+	}
 	db := DB(ctx)
 	err := db.CreateInBatches(value, 1000).Error
 	return r.errHandle(err)
