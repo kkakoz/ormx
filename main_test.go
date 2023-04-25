@@ -19,3 +19,18 @@ func TestMain(m *testing.M) {
 	ormx.FlushDB()
 	m.Run()
 }
+
+func TestB(t *testing.T) {
+	//userQuery := ormx.NewQuery[UserQuery, User](UserQuery{}, ormx.DB(context.Background()))
+}
+
+type User struct {
+}
+
+type UserQuery struct {
+	ormx.Query
+}
+
+func (q *UserQuery) IDEQ() {
+	q.Query.Where("id = ?")
+}
